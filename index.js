@@ -3,7 +3,7 @@ var bodyParser = require('body-parser');
 var OAuth2Server = require('oauth2-server');
 var Request = OAuth2Server.Request;
 var Response = OAuth2Server.Response;
-const { pool } = require('pg');
+const { Pool } = require('pg'); // ✅ CORRECT
 const cors = require('cors');
 // userroute = require('./routes/user');
 
@@ -18,7 +18,7 @@ app.use(cors());
 app.get('/', function(req, res) {
     res.send('Hello World! system is running');
 });
-app.use("/", userroute);
+// app.use("/", userroute);
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -28,11 +28,12 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-pool.connect((err) => {
+pool.connect((err, client, release) => {
     if (err) {
-        console.error('message connecting to PostgreSQL:', err);
+        console.error('Error connecting to PostgreSQL:', err.stack);
     } else {
-        console.log('Connected to the PostgreSQL');
+        console.log('Connected to PostgreSQL');
+        release(); // Release the client after checking the connection
     }
 });
 
